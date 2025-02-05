@@ -18,7 +18,7 @@ jobs:
       - name: Setup SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_PORT: 2211
+          SSH_PORT: ${{ vars.SSH_PORT }}
           IP_SERVER: ${{ secrets.IP_SERVER }}
         run: |
           mkdir -p ~/.ssh
@@ -29,7 +29,7 @@ jobs:
 
       - name: SSH ke VPS
         env:
-          SSH_PORT: 2211
+          SSH_PORT: ${{ vars.SSH_PORT }}
           VAR_USER: ${{ vars.VAR_USER }}
           IP_SERVER: ${{ secrets.IP_SERVER }}
         run: |
