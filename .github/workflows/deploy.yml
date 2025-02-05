@@ -32,6 +32,11 @@ jobs:
           SSH_PORT: ${{ vars.SSH_PORT }}
           VAR_USER: ${{ vars.VAR_USER }}
           IP_SERVER: ${{ secrets.IP_SERVER }}
+          TOKEN: ${{ secrets.TOKEN }}
+          VAR_DIREKTORI: ${{ vars.VAR_DIREKTORI }}
+          GIT_USER: ${{ vars.GIT_USER }}
+          VAR_GIT_URL_TANPA_HTTP: ${{ vars.VAR_GIT_URL_TANPA_HTTP }}
+
         run: |
-          ssh -p "$SSH_PORT" "$VAR_USER@$IP_SERVER" "docker ps -a"
+          ssh -p "$SSH_PORT" "$VAR_USER@$IP_SERVER" "cd $VAR_DIREKTORI && git pull https://$GIT_USER:$TOKEN@$VAR_GIT_URL_TANPA_HTTP main && exit"
           echo "Deploy Berhasil"
