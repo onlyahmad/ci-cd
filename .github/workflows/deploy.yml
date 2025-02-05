@@ -6,13 +6,6 @@ on:
   # pull_request:
   #   branches: [ "main" ]
 
-env:
-  VAR_USER: developer
-  GIT_USER: onlyahmad
-  VAR_DIREKTORI: /home/developer/symantra.id/be/html
-  VAR_GIT_URL_TANPA_HTTP: github.com/budyhartono55/mats-api.git
-  SSH_PORT: 2211
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -33,7 +26,7 @@ jobs:
 
       - name: ssh ke vps
         run: |
-              ssh -p ${{ env.SSH_PORT}} ${{ env.VAR_USER }}@${{ vars.IP_SERVER }} "docker ps -a"
+              ssh -p ${{ vars.SSH_PORT}} ${{ vars.VAR_USER }}@${{ secrets.IP_SERVER }} "docker ps -a"
               echo "Deploy Berhasil"
 #ssh -p ${{ env.SSH_PORT}} ${{ env.VAR_USER }}@${{ vars.IP_SERVER }} "cd ${{ env.VAR_DIREKTORI }} && git pull https://${{ env.GIT_USER}}:${{ vars.TOKEN}}@${{ env.VAR_GIT_URL_TANPA_HTTP}} main && exit"
 
