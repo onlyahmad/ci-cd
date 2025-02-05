@@ -3,36 +3,35 @@ name: Deploy
 on:
   push:
     branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     
-      - name: create new ssh server
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install SSH Client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          IP_SERVER: ${{ secrets.IP_SERVER }}
         run: |
-              apt-get update && apt-get install -y openssh-client 
-              eval $(ssh-agent -s)
-              echo "{{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
-              mkdir -p ~/.ssh
-              chmod 700 ~/.ssh
-              echo "{{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-              chmod 600 ~/.ssh/id_rsa
-              ssh-keyscan -p ${{ secrets.SSH_PORT}} {{ secrets.IP_SERVER }} >> ~/.ssh/known_hosts
-              chmod 644 ~/.ssh/known_hosts
-              '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "$SSH_PORT" "$IP_SERVER" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
-      - name: ssh ke vps
+      - name: SSH ke VPS
+        env:
+          SSH_PORT: ${{ vars.SSH_PORT }}
+          VAR_USER: ${{ vars.VAR_USER }}
+          IP_SERVER: ${{ secrets.IP_SERVER }}
         run: |
-              ssh -p ${{ vars.SSH_PORT}} ${{ vars.VAR_USER }}@${{ secrets.IP_SERVER }} "docker ps -a"
-              echo "Deploy Berhasil"
-#ssh -p ${{ env.SSH_PORT}} ${{ env.VAR_USER }}@${{ vars.IP_SERVER }} "cd ${{ env.VAR_DIREKTORI }} && git pull https://${{ env.GIT_USER}}:${{ vars.TOKEN}}@${{ env.VAR_GIT_URL_TANPA_HTTP}} main && exit"
-
-    # - ls -lah ~/.ssh  # Cek apakah file id_rsa ada
-    # - cat ~/.ssh/id_rsa  # Cek apakah key tersimpan dengan benar (hapus di output log agar aman)
-    # - ssh-keygen -y -f ~/.ssh/id_rsa  # Cek apakah bisa mengekstrak public key
-              
-
-
+          ssh -p "$SSH_PORT" "$VAR_USER@$IP_SERVER" "docker ps -a"
+          echo "Deploy Berhasil"
