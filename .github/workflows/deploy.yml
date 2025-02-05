@@ -38,5 +38,5 @@ jobs:
           VAR_GIT_URL_TANPA_HTTP: ${{ vars.VAR_GIT_URL_TANPA_HTTP }}
 
         run: |
-          ssh -p "$SSH_PORT" "$VAR_USER@$IP_SERVER" "cd $VAR_DIREKTORI && git pull https://$GIT_USER:$TOKEN@$VAR_GIT_URL_TANPA_HTTP main && exit"
+          ssh -p "$SSH_PORT" "$VAR_USER@$IP_SERVER" "cd $VAR_DIREKTORI && git pull https://$GIT_USER:$TOKEN@$VAR_GIT_URL_TANPA_HTTP production && exit"
           echo "Deploy Berhasil"
