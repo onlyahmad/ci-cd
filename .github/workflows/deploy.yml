@@ -1,36 +1,45 @@
-# This is a basic workflow to help you get started with Actions
+name: Deploy
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "production" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+env:
+  VAR_USER: developer
+  GIT_USER: onlyahmad
+  VAR_DIREKTORI: /home/developer/symantra.id/be/html
+  VAR_GIT_URL_TANPA_HTTP: github.com/budyhartono55/mats-api.git
+  SSH_PORT: 2211
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  deploy:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+    
+      - name: create new ssh server
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+              apt-get update && apt-get install -y openssh-client 
+              eval $(ssh-agent -s)
+              echo "{{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
+              mkdir -p ~/.ssh
+              chmod 700 ~/.ssh
+              echo "{{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              ssh-keyscan -p ${{ secrets.SSH_PORT}} {{ secrets.IP_SERVER }} >> ~/.ssh/known_hosts
+              chmod 644 ~/.ssh/known_hosts
+              '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+      - name: ssh ke vps
+        run: |
+              ssh -p ${{ env.SSH_PORT}} ${{ env.VAR_USER }}@${{ vars.IP_SERVER }} "docker ps -a"
+              echo "Deploy Berhasil"
+#ssh -p ${{ env.SSH_PORT}} ${{ env.VAR_USER }}@${{ vars.IP_SERVER }} "cd ${{ env.VAR_DIREKTORI }} && git pull https://${{ env.GIT_USER}}:${{ vars.TOKEN}}@${{ env.VAR_GIT_URL_TANPA_HTTP}} main && exit"
+
+    # - ls -lah ~/.ssh  # Cek apakah file id_rsa ada
+    # - cat ~/.ssh/id_rsa  # Cek apakah key tersimpan dengan benar (hapus di output log agar aman)
+    # - ssh-keygen -y -f ~/.ssh/id_rsa  # Cek apakah bisa mengekstrak public key
+              
+
+
